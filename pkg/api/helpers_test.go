@@ -2,13 +2,15 @@ package radosAPI
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"testing"
 	"time"
 
 	"strings"
 
-	minio "github.com/minio/minio-go"
+	minio "github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -612,9 +614,12 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 
 		buckets, err := api.GetBucket(BucketConfig{
@@ -652,9 +657,12 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 
 		buckets, err := api.GetBucket(BucketConfig{
@@ -691,9 +699,12 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 
 		api.RemoveBucket(BucketConfig{
@@ -758,9 +769,12 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 		err = api.UnlinkBucket(BucketConfig{
 			Bucket: "unittestbucket",
@@ -812,9 +826,12 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 		index, err := api.CheckBucket(BucketConfig{
 			Bucket: "unittestbucket",
@@ -849,12 +866,15 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 		b := bytes.NewBufferString("content")
-		_, err = minioClient.PutObject("unittestbucket", "test.txt", b, int64(b.Len()), minio.PutObjectOptions{})
+		_, err = minioClient.PutObject(context.TODO(), "unittestbucket", "test.txt", b, int64(b.Len()), minio.PutObjectOptions{})
 		So(err, ShouldBeNil)
 
 		err = api.RemoveObject(BucketConfig{
@@ -906,9 +926,12 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 
 		policy, err := api.GetBucketPolicy(BucketConfig{})
@@ -946,12 +969,16 @@ func TestBucket(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
+
 		b := bytes.NewBufferString("content")
-		_, err = minioClient.PutObject("unittestbucket", "test.txt", b, int64(b.Len()), minio.PutObjectOptions{})
+		_, err = minioClient.PutObject(context.TODO(), "unittestbucket", "test.txt", b, int64(b.Len()), minio.PutObjectOptions{})
 		So(err, ShouldBeNil)
 
 		policy, err := api.GetObjectPolicy(BucketConfig{})
@@ -1071,9 +1098,12 @@ func TestQuota(t *testing.T) {
 			So(err, ShouldBeNil)
 		}()
 
-		minioClient, err := minio.New(url, user.Keys[0].AccessKey, user.Keys[0].SecretKey, useSSL)
+		minioClient, err := minio.New(url, &minio.Options{
+			Secure: useSSL,
+			Creds:  credentials.NewStaticV4(user.Keys[0].AccessKey, user.Keys[0].SecretKey, ""),
+		})
 		So(err, ShouldBeNil)
-		err = minioClient.MakeBucket("unittestbucket", "")
+		err = minioClient.MakeBucket(context.TODO(), "unittestbucket", minio.MakeBucketOptions{})
 		So(err, ShouldBeNil)
 
 		err = api.UpdateBuckQuota(QuotaConfig{

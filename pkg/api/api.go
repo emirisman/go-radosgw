@@ -1,6 +1,9 @@
 package radosAPI
 
 import (
+	"bytes"
+	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,7 +12,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/smartystreets/go-aws-auth"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 )
 
 // API contains fields to communicate with the rados-gateway
@@ -45,11 +49,16 @@ func (api *API) makeRequest(verb, url string) (body []byte, statusCode int, err 
 	if err != nil {
 		return
 	}
-	awsauth.SignS3(req, awsauth.Credentials{
+	signer := v4.NewSigner()
+	credentials := aws.Credentials{
 		AccessKeyID:     api.accessKey,
 		SecretAccessKey: api.secretKey,
-		Expiration:      time.Now().Add(1 * time.Minute)},
-	)
+	}
+
+	payloadHash := getRequestBodySHA256(req)
+
+	// For Ceph, region name does not matter and the service is always S3
+	signer.SignHTTP(context.TODO(), credentials, req, payloadHash, "s3", "us-east-1", time.Now())
 	resp, err := api.client.Do(req)
 	if err != nil {
 		return
@@ -81,4 +90,15 @@ func (api *API) call(verb, route string, args url.Values, usePrefix bool, sub ..
 		err = fmt.Errorf("[%v]: %v", statusCode, err)
 	}
 	return
+}
+
+func getRequestBodySHA256(request *http.Request) string {
+	if request.Body == nil {
+		// SHA256 hash of empty string
+		return "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	}
+	payload, _ := ioutil.ReadAll(request.Body)
+	request.Body = ioutil.NopCloser(bytes.NewReader(payload))
+
+	return string(sha256.New().Sum(payload))
 }
